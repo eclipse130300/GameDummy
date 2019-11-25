@@ -30,10 +30,22 @@ public class Initializer : MonoBehaviour, IServiceLocator
     private void Start()
     {
         services = new Dictionary<object, IService>();
-        
-        Debug.LogFormat("Service {0} successfuly created", GetService<IUIController>().name);
-        Debug.LogFormat("Service {0} successfuly created", GetService<IDataController>().name);
 
+        try
+        {
+            IService[] servicesToAdd = new IService[] 
+            {
+                GetService<IUIController>(),
+                GetService<IDataController>()
+            };
+            foreach (IService service in servicesToAdd)
+                Debug.LogFormat("Service {0} successfuly created", service.name);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e);
+        }
+        
         foreach (var service in services)
             service.Value.Init(this);
     }
