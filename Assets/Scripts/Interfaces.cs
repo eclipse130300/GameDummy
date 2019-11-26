@@ -31,7 +31,7 @@ public interface IServiceBuilder
     IService Create();
 }
 
-public interface IGeneralizedServiceBuilder
+public interface IGeneralServiceBuilder
 {
     IService Create<T>();
 }

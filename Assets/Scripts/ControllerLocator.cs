@@ -1,16 +1,19 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Initializer : MonoBehaviour, IServiceLocator
+using Object = UnityEngine.Object;
+
+public class ControllerLocator : MonoBehaviour, IServiceLocator
 {
-    private Dictionary<object, IService> services;
+    private Dictionary<Type, IService> container;
 
     public T GetService<T>()
     {
         try
         {
-            return (T)services[typeof(T)];
+            return (T)container[typeof(T)];
         }
         catch (KeyNotFoundException)
         {
@@ -22,31 +25,38 @@ public class Initializer : MonoBehaviour, IServiceLocator
 
     private IService AddService<T>()
     {
-        IGeneralizedServiceBuilder serviceBuilder = new ServiceBuilder();
-        services.Add(typeof(T), serviceBuilder.Create<T>());
-        return services[typeof(T)];
+        try
+        {
+            IGeneralServiceBuilder serviceBuilder = new ServiceBuilder();
+            container.Add(typeof(T), serviceBuilder.Create<T>());
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        return container[typeof(T)];
     }
 
     private void Start()
     {
-        services = new Dictionary<object, IService>();
+        DontDestroyOnLoad(this);
+
+        container = new Dictionary<Type, IService>();
 
         try
         {
-            IService[] servicesToAdd = new IService[] 
-            {
-                GetService<IUIController>(),
-                GetService<IDataController>()
-            };
-            foreach (IService service in servicesToAdd)
-                Debug.LogFormat("Service {0} successfuly created", service.name);
+            AddService<IUIController>();
+            AddService<IDataController>();
+
+            foreach (var service in container)
+                Debug.LogFormat("Service {0} successfuly created", service.Value.name);
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
-            Debug.LogError(e);
+            throw e;
         }
         
-        foreach (var service in services)
+        foreach (var service in container)
             service.Value.Init(this);
     }
 }
@@ -69,9 +79,9 @@ public class DataControllerBuilder : IServiceBuilder
 {
     public IService Create()
     {
-        GameObject uiController = Object.Instantiate(Resources.Load<GameObject>("Services/DataController"));
-        uiController.name = "DataController";
-        return uiController.GetComponent<IService>();
+        GameObject dataController = Object.Instantiate(Resources.Load<GameObject>("Services/DataController"));
+        dataController.name = "DataController";
+        return dataController.GetComponent<IService>();
     }
 }
 
@@ -80,7 +90,7 @@ public class DataControllerBuilder : IServiceBuilder
 #region GeneralizedFactory
 
 [System.Serializable]
-public class ServiceBuilder : IGeneralizedServiceBuilder
+public class ServiceBuilder : IGeneralServiceBuilder
 {
     public IService Create<T>()
     {

@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour, IUIController
 {
+    [SerializeField] private Text coins;
+    [SerializeField] private Text gems;
+
     private IServiceLocator ServiceLocator { get; set; }
-
-    [SerializeField] Text coins;
-    [SerializeField] Text gems;
-
+    
     public void Init(IServiceLocator serviceLocator)
     {
         ServiceLocator = serviceLocator;

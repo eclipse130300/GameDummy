@@ -1,14 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using NaughtyAttributes;
+using Utility;
 
 public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISaveManager
 {
-    private IServiceLocator ServiceLocator { get; set; }
-    private IUIController uiController { get; set; }
+    #region Static
 
+    public static bool Started;
+
+    #endregion //Static
+    
+    #region Properties
+    
     private double coins;
+    [ShowNativeProperty]
     public double Coins
     {
         get => coins;
@@ -20,6 +29,7 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
     }
 
     private int gems;
+    [ShowNativeProperty]
     public int Gems
     {
         get => gems;
@@ -30,13 +40,41 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
         }
     }
 
+    #endregion //Properties
+
+    #region Private
+
+    private IServiceLocator ServiceLocator { get; set; }
+    private IUIController uiController { get; set; }
+    [ShowNonSerializedField] private int currentScene;
+
+    #endregion //Private
+
+    #region Unity Methods
+
+    private void OnApplicationPause(bool pause)
+    {
+        if (Started && pause)
+        {
+            SaveGameState();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveGameState();
+    }
+
+    #endregion //Unity Methods
+
     public void Init(IServiceLocator serviceLocator)
     {
         ServiceLocator = serviceLocator;
-        uiController = serviceLocator.GetService<IUIController>();
+        uiController = ServiceLocator.GetService<IUIController>();
 
         Coins = 100;
         Gems = 200;
+        currentScene = 0;
 
         DontDestroyOnLoad(this);
 
@@ -48,18 +86,54 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
         LoadLevel();
     }
 
-    private void OnLevelLoaded(Scene scene, LoadSceneMode mode)
+    public void LoadLevel()
     {
-        
+        LoadScene(((SceneNames)currentScene).ToString());
     }
 
-    public void LoadLevel() { }
+    private void OnLevelLoaded(Scene scene, LoadSceneMode mode) { }
+    
+    #region Scene Management
+
+    private void LoadScene(string sceneName)
+    {
+        SceneManager.LoadSceneAsync(sceneName);
+    }
+
+    #endregion //Scene Management
 
     #region Save/Load
 
-    public void SaveGameState() { }
+    public void SaveGameState()
+    {
+        SaveData data = new SaveData();
 
-    private void TryLoadData() { }
+        data.coins = coins;
+        data.gems = gems;
+        
+        Serialization.SaveToBinnary<SaveData>(data);
+    }
 
-    #endregion
+    private void TryLoadData()
+    {
+        SaveData data;
+        if (!Serialization.LoadFromBinnary<SaveData>(out data)) return;
+
+        Coins = data.coins;
+        Gems = data.gems;
+    }
+
+    #endregion //Save/Load
+}
+
+[System.Serializable]
+public class SaveData
+{
+    public double coins;
+    public int gems;
+}
+
+public enum SceneNames
+{
+    Game
 }
