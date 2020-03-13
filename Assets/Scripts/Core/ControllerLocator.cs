@@ -27,7 +27,7 @@ public class ControllerLocator : MonoBehaviour, IServiceLocator
     {
         try
         {
-            IGeneralServiceBuilder serviceBuilder = new ServiceBuilder();
+            IServiceBuilder serviceBuilder = new ServiceBuilder();
             container.Add(typeof(T), serviceBuilder.Create<T>());
         }
         catch (Exception e)
@@ -61,36 +61,8 @@ public class ControllerLocator : MonoBehaviour, IServiceLocator
     }
 }
 
-#region Factory
-
 [System.Serializable]
-public class UIControllerBuilder : IServiceBuilder
-{
-    public IService Create()
-    {
-        GameObject uiController = Object.Instantiate(Resources.Load<GameObject>("Services/UIController"));
-        uiController.name = "UIController";
-        return uiController.GetComponent<IService>();
-    }
-}
-
-[System.Serializable]
-public class DataControllerBuilder : IServiceBuilder
-{
-    public IService Create()
-    {
-        GameObject dataController = Object.Instantiate(Resources.Load<GameObject>("Services/DataController"));
-        dataController.name = "DataController";
-        return dataController.GetComponent<IService>();
-    }
-}
-
-#endregion
-
-#region GeneralizedFactory
-
-[System.Serializable]
-public class ServiceBuilder : IGeneralServiceBuilder
+public class ServiceBuilder : IServiceBuilder
 {
     public IService Create<T>()
     {
@@ -100,5 +72,3 @@ public class ServiceBuilder : IGeneralServiceBuilder
         return uiController.GetComponent<IService>();
     }
 }
-
-#endregion

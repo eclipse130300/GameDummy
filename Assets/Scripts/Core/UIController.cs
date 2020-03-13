@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour, IUIController
 {
-    [SerializeField] private Text coins;
-    [SerializeField] private Text gems;
+    [SerializeField] private Text softCurrency;
+    [SerializeField] private Text donateCurrency;
 
     private IServiceLocator ServiceLocator { get; set; }
     
@@ -18,7 +18,7 @@ public class UIController : MonoBehaviour, IUIController
 
     public void UpdateCurrency(ICurrencyData data)
     {
-        coins.text = data.Coins.ToString();
-        gems.text = data.Gems.ToString();
+        if(softCurrency) softCurrency.text = data.SoftCurrency.ToString();
+        if (donateCurrency) donateCurrency.text = data.DonateCurrency.ToString();
     }
 }

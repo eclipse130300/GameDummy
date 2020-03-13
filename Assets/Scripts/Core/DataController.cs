@@ -13,29 +13,35 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
     public static bool Started;
 
     #endregion //Static
-    
+
     #region Properties
-    
-    private double coins;
+
+    private long softCurrency;
     [ShowNativeProperty]
-    public double Coins
+    public long SoftCurrency
     {
-        get => coins;
+        get
+        {
+            return softCurrency;
+        }
         set
         {
-            coins = value;
+            softCurrency = value;
             uiController.UpdateCurrency(this);
         }
     }
-
-    private int gems;
+    
+    private long donateCurrency;
     [ShowNativeProperty]
-    public int Gems
+    public long DonateCurrency
     {
-        get => gems;
+        get
+        {
+            return donateCurrency;
+        }
         set
         {
-            gems = value;
+            donateCurrency = value;
             uiController.UpdateCurrency(this);
         }
     }
@@ -71,9 +77,7 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
     {
         ServiceLocator = serviceLocator;
         uiController = ServiceLocator.GetService<IUIController>();
-
-        Coins = 100;
-        Gems = 200;
+        
         currentScene = 0;
 
         DontDestroyOnLoad(this);
@@ -83,10 +87,12 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
 
         TryLoadData();
 
-        LoadLevel();
+        LoadGame();
+
+        Started = true;
     }
 
-    public void LoadLevel()
+    public void LoadGame()
     {
         LoadScene(((SceneNames)currentScene).ToString());
     }
@@ -108,10 +114,11 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
     {
         SaveData data = new SaveData();
 
-        data.coins = coins;
-        data.gems = gems;
-        
-        Serialization.SaveToBinnary<SaveData>(data);
+        data.Add("SoftCurrency", SoftCurrency);
+        data.Add("DonateCurrency", DonateCurrency);
+
+        if (Serialization.SaveToBinnary<SaveData>(data)) Debug.Log("Game saved succesfuly");
+        else Debug.Log("Game not saved");
     }
 
     private void TryLoadData()
@@ -119,8 +126,8 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
         SaveData data;
         if (!Serialization.LoadFromBinnary<SaveData>(out data)) return;
 
-        Coins = data.coins;
-        Gems = data.gems;
+        SoftCurrency = data.Get<long>("SoftCurrency");
+        DonateCurrency = data.Get<long>("DonateCurrency");
     }
 
     #endregion //Save/Load
@@ -129,8 +136,29 @@ public class DataController : MonoBehaviour, IDataController, ICurrencyData, ISa
 [System.Serializable]
 public class SaveData
 {
-    public double coins;
-    public int gems;
+    private Dictionary<string, object> container;
+
+    public SaveData()
+    {
+        container = new Dictionary<string, object>();
+    }
+
+    public void Add(string name, object obj)
+    {
+        container.Add(name, obj);
+    }
+
+    public T Get<T>(string name)
+    {
+        try
+        {
+            return (T)container[name];
+        }
+        catch
+        {
+            return default;
+        }
+    }
 }
 
 public enum SceneNames

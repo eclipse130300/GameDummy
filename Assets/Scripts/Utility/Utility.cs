@@ -10,9 +10,9 @@ namespace Utility
 {
     public class EnumOperations
     {
-        public static universal ParseEnum<universal>(string value) // Convert string to enum
+        public static T ParseEnum<T>(string value) // Convert string to enum
         {
-            return (universal)Enum.Parse(typeof(universal), value, true);
+            return (T)Enum.Parse(typeof(T), value, true);
         }
     }
 
@@ -54,7 +54,7 @@ namespace Utility
             }
         }
 
-        public static bool SaveToBinnary<universal>(universal SerializableObject) // Save universal type object into file
+        public static bool SaveToBinnary<T>(T SerializableObject) // Save universal type object into file
         {
             try
             {
@@ -80,7 +80,7 @@ namespace Utility
             }
         }
 
-        public static bool SaveToBinnary<universal>(String FilePath, universal SerializableObject) // Save universal type object into file
+        public static bool SaveToBinnary<T>(String FilePath, T SerializableObject) // Save universal type object into file
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Utility
             }
         }
 
-        public static bool LoadFromBinnary<universal>(out universal result) // Load universal type object from file
+        public static bool LoadFromBinnary<T>(out T result) // Load universal type object from file
         {
             try
             {
@@ -115,26 +115,26 @@ namespace Utility
                     BinaryFormatter formatter = new BinaryFormatter();
                     try
                     {
-                        result = (universal)formatter.Deserialize(fs);
+                        result = (T)formatter.Deserialize(fs);
                         return true;
                     }
                     catch (Exception e)
                     {
                         //Debug.LogError("Failed deserialization");
                         Debug.LogError(e.Message);
-                        result = default(universal);
+                        result = default(T);
                         return false;
                     }
                 }
             }
             catch
             {
-                result = default(universal);
+                result = default(T);
                 return false;
             }
         }
 
-        public static bool LoadFromBinnary<universal>(String FilePath, out universal result) // Load universal type object from file
+        public static bool LoadFromBinnary<T>(String FilePath, out T result) // Load universal type object from file
         {
             try
             {
@@ -143,26 +143,26 @@ namespace Utility
                     BinaryFormatter formatter = new BinaryFormatter();
                     try
                     {
-                        result = (universal)formatter.Deserialize(fs);
+                        result = (T)formatter.Deserialize(fs);
                         return true;
                     }
                     catch (Exception e)
                     {
                         //Debug.LogError("Failed deserialization");
                         Debug.LogError(e.Message);
-                        result = default(universal);
+                        result = default(T);
                         return false;
                     }
                 }
             }
             catch
             {
-                result = default(universal);
+                result = default(T);
                 return false;
             }
         }
         
-        public static bool LoadFromTextAsset<universal>(TextAsset textAsset, out universal result) // Load universal type object from TextAsset
+        public static bool LoadFromTextAsset<T>(TextAsset textAsset, out T result) // Load universal type object from TextAsset
         {
             try
             {
@@ -172,21 +172,21 @@ namespace Utility
                 BinaryFormatter formatter = new BinaryFormatter();
                 try
                 {
-                    result = (universal)formatter.Deserialize(memStream);
-                    //Debug.Log("Deserialization success");
+                    result = (T)formatter.Deserialize(memStream);
+                    Debug.Log("Deserialization success");
                     return true;
                 }
                 catch (SerializationException e)
                 {
                     Debug.LogError("Failed deserialization");
-                    result = default(universal);
+                    result = default(T);
                     return false;
                 }
             }
             catch (Exception e)
             {
                 Debug.LogWarning(e.Message);
-                result = default(universal);
+                result = default(T);
                 return false;
             }
         }
